@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Hero() {
   return (
     <section className="relative mx-auto max-w-7xl px-6 pb-20 pt-20 text-center sm:pb-28 sm:pt-28 lg:px-8 lg:pt-32" id="how-it-works">
@@ -14,10 +16,10 @@ export default function Hero() {
           GitGlow analyzes your repositories, documentation, and coding habits to help you stand out to recruiters and land internships.
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <a href="#get-started" className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#d7ff54] px-6 text-sm font-semibold text-zinc-950 transition duration-300 hover:-translate-y-0.5 hover:bg-[#e0ff7b] hover:shadow-[0_10px_36px_rgba(215,255,84,0.22)] sm:w-auto">
+          <Link href="/analyze" className="group inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#d7ff54] px-6 text-sm font-semibold text-zinc-950 transition duration-300 hover:-translate-y-0.5 hover:bg-[#e0ff7b] hover:shadow-[0_10px_36px_rgba(215,255,84,0.22)] sm:w-auto">
             Analyze My GitHub
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="size-4 transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </a>
+          </Link>
           <a href="#portfolio-preview" className="inline-flex h-12 w-full items-center justify-center rounded-full border border-zinc-800 bg-zinc-900/40 px-6 text-sm font-medium text-zinc-200 transition hover:border-zinc-700 hover:bg-zinc-800 sm:w-auto">
             View Demo
           </a>
