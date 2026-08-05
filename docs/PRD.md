@@ -1,7 +1,7 @@
 # GitGlow Product Requirements Document (PRD)
 
-Version: 0.1  
-Status: Draft  
+Version: 0.3  
+Status: Active Development  
 Author: Aarav Lodha  
 Last Updated: August 2026
 
@@ -37,6 +37,8 @@ Very few evaluate:
 - Recruiter readiness
 - Resume consistency
 - Career progression
+- Company-specific alignment
+- Interview preparedness
 
 GitGlow aims to solve this problem.
 
@@ -73,6 +75,8 @@ To become the AI career coach every developer uses before applying for software 
 - Provide personalized AI recommendations
 - Help developers understand recruiter expectations
 - Encourage best engineering practices
+- Bridge resume and portfolio gaps
+- Prepare developers for company-specific interviews
 
 ## Success Metrics
 
@@ -80,12 +84,15 @@ To become the AI career coach every developer uses before applying for software 
 - Portfolio score updates after repository improvements.
 - Users return to analyze new projects.
 - Positive feedback on recommendation usefulness.
+- Resume alignment insights help users identify skill gaps.
+- Company readiness reports guide targeted improvements.
+- Interview prep generates relevant, project-specific questions.
 
 ---
 
-# 6. Non-Goals (MVP)
+# 6. Non-Goals (v0.1-v0.3)
 
-The first release will **not** include:
+The current releases do **not** include:
 
 - Full static code analysis
 - IDE plugins
@@ -93,43 +100,41 @@ The first release will **not** include:
 - Social networking
 - Team collaboration
 - Enterprise features
+- README generation (planned for v0.4+)
+- Public portfolio pages (planned for v1.0)
 
 ---
 
-# 7. MVP Features
+# 7. Implemented Features
 
 ## GitHub Authentication
 
-Users sign in securely using GitHub OAuth.
+Users sign in securely using GitHub OAuth via Supabase.
 
 ## Portfolio Dashboard
 
 Display:
-
 - Portfolio Score
 - Repository Count
 - Programming Languages
-- Contribution Activity
 - Documentation Score
 - Project Diversity
+- Score trends over time
+- Quick access to all report types
 
 ## Repository Analysis
 
 Analyze each repository for:
-
 - README quality
 - Description quality
 - Repository topics
 - License
-- Screenshots
-- Demo links
 - Documentation
 - Project structure
 
 ## AI Recommendations
 
 Provide personalized suggestions such as:
-
 - Improve README
 - Add screenshots
 - Add installation guide
@@ -140,7 +145,6 @@ Provide personalized suggestions such as:
 ## Portfolio Score
 
 Generate a score out of 100 based on:
-
 - Documentation
 - Professionalism
 - Repository Health
@@ -148,16 +152,43 @@ Generate a score out of 100 based on:
 - Presentation
 - Project Diversity
 
+## Resume Analysis
+
+- Upload resume as PDF or text
+- Paste resume text directly
+- Compare resume against GitHub projects
+- Identify skill gaps (present, missing, partial)
+- Project alignment analysis
+- Experience gap detection
+
+## Company Readiness
+
+- Select from preset companies or enter custom target
+- Evaluate portfolio alignment with company-specific expectations
+- Relevant skills with proficiency levels
+- Missing skills identification
+- Project fit assessment with reasoning
+
+## Interview Preparation
+
+- Generate personalized interview questions based on GitHub projects
+- Question types: Technical, Behavioral, System Design, Project
+- Difficulty levels: Easy, Medium, Hard
+- Focus areas for preparation
+- Actionable hints for each question
+
 ---
 
 # 8. Future Features
 
-- Resume Analysis
-- Company Readiness
-- AI Interview Coach
-- Career Roadmap
-- Public Portfolio Profiles
+- README Assistant (auto-generate professional READMEs)
+- Public Portfolio Pages
 - Learning Recommendations
+- Career Roadmap
+- AI Project Idea Generator
+- Portfolio analytics over time
+- Team dashboards
+- Recruiter view
 
 ---
 
@@ -171,31 +202,27 @@ GitHub Sign In
 
 ↓
 
-Portfolio Import
-
-↓
-
-AI Analysis
-
-↓
-
 Dashboard
 
 ↓
 
-Repository Analysis
+Choose Analysis Type:
+- Portfolio Analysis
+- Resume Analysis
+- Company Readiness
+- Interview Prep
 
 ↓
 
-Recommendations
+View Report
 
 ↓
 
-Portfolio Improvement
+Implement Recommendations
 
 ↓
 
-Re-analysis
+Re-analyze
 
 ---
 
@@ -203,15 +230,15 @@ Re-analysis
 
 ## Frontend
 
-- Next.js
+- Next.js 16 (App Router)
 - React
 - TypeScript
 - Tailwind CSS
-- shadcn/ui
+- Recharts
 
 ## Backend
 
-- Supabase
+- Supabase (PostgreSQL + Auth + RLS)
 
 ## Authentication
 
@@ -219,46 +246,68 @@ Re-analysis
 
 ## AI
 
-- OpenAI API
+- Groq API (JSON schema structured outputs)
+
+## PDF Processing
+
+- pdf-parse
 
 ## Deployment
 
 - Vercel
 
-## Charts
+---
 
-- Recharts
+# 11. Database Schema
+
+## portfolio_reports
+- id, user_id, username, score, strengths, recommendations, metrics, repositories, created_at
+
+## resume_reports
+- id, user_id, username, score, strengths, recommendations, skill_gaps, project_alignment, experience_gaps, created_at
+
+## company_reports
+- id, user_id, username, company, score, strengths, recommendations, relevant_skills, missing_skills, project_fit, created_at
+
+## interview_reports
+- id, user_id, username, score, strengths, recommendations, questions, focus_areas, created_at
+
+All tables have Row Level Security (RLS) enabled with policies restricting access to the report owner.
 
 ---
 
-# 11. Success Criteria
+# 12. Success Criteria
 
-The MVP is successful if users can:
+The current release is successful if users can:
 
 - Connect their GitHub account
-- Analyze repositories
-- Receive a Portfolio Score
+- Analyze repositories and receive a Portfolio Score
 - Get AI-generated recommendations
-- Identify improvements for each repository
+- Upload/paste a resume and compare it to their GitHub
+- Evaluate portfolio readiness for specific companies
+- Generate personalized interview questions
+- Access all reports from a unified dashboard
 
 ---
 
-# 12. Risks
+# 13. Risks
 
 - GitHub API rate limits
-- AI API costs
+- AI API costs and rate limits
 - Large repositories increasing analysis time
-- User expectations exceeding MVP scope
+- PDF parsing reliability across different resume formats
+- User expectations exceeding current scope
+- Groq API schema validation strictness
 
 ---
 
-# 13. Future Vision
+# 14. Future Vision
 
 GitGlow should evolve into an AI-powered software engineering career platform that helps developers improve their portfolios, prepare for interviews, and become more competitive internship and job candidates.
 
 ---
 
-# 14. Design Principles
+# 15. Design Principles
 
 ## 1. Actionable Over Informational
 

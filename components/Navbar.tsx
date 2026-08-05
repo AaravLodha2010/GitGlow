@@ -22,6 +22,9 @@ export default async function Navbar() {
         <Link className="transition-colors hover:text-zinc-100" href="/#features">Features</Link>
         <Link className="transition-colors hover:text-zinc-100" href="/how-it-works">How It Works</Link>
         <Link className="transition-colors hover:text-zinc-100" href="/pricing">Pricing</Link>
+        {user && <Link className="transition-colors hover:text-zinc-100" href="/resume">Resume analysis</Link>}
+        {user && <Link className="transition-colors hover:text-zinc-100" href="/company-readiness">Company readiness</Link>}
+        {user && <Link className="transition-colors hover:text-zinc-100" href="/interview-prep">Interview prep</Link>}
       </nav>
 
       {user ? <Link href="/dashboard" className="rounded-full bg-zinc-100 px-4 py-2.5 text-xs font-semibold text-zinc-950 transition duration-300 hover:bg-[#d7ff54] hover:shadow-[0_0_24px_rgba(215,255,84,0.16)] sm:px-5 sm:text-sm">Open dashboard</Link> : <GitHubAuthButton compact />}

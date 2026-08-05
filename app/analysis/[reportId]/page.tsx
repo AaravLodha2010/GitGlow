@@ -6,6 +6,18 @@ import { getPortfolioReport } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ reportId: string }> }) {
+  const { reportId } = await params;
+  const report = await getPortfolioReport(reportId);
+  if (!report) {
+    return { title: "Report not found — GitGlow" };
+  }
+  return {
+    title: `Portfolio report · @${report.username} — GitGlow`,
+    description: `GitHub portfolio score: ${report.analysis.score}/100. View strengths, recommendations, and project-level feedback.`,
+  };
+}
+
 export default async function ReportPage({ params }: { params: Promise<{ reportId: string }> }) {
   const { reportId } = await params;
   const report = await getPortfolioReport(reportId);

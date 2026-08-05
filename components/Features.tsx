@@ -1,7 +1,7 @@
 const features = [
   { title: "AI Portfolio Review", text: "A recruiter-minded analysis that turns your GitHub activity into clear, useful feedback.", icon: <path d="M12 3l1.7 5.3H19l-4.3 3.1 1.6 5.3-4.3-3.1-4.3 3.1 1.6-5.3L5 8.3h5.3L12 3z" /> },
-  { title: "GitHub Health Score", text: "See the strength of your profile in one score, with a practical breakdown behind it.", icon: <><path d="M4 13.5l4-4 3 2.5 6-6" /><path d="M13 6h4v4" /></> },
-  { title: "README Assistant", text: "Give every project a polished first impression with focused documentation guidance.", icon: <><path d="M5 4.5A2.5 2.5 0 017.5 2H19v17H7.5A2.5 2.5 0 015 16.5v-12z" /><path d="M5 16.5A2.5 2.5 0 017.5 14H19" /></> },
+  { title: "Resume Alignment", text: "Compare your resume against GitHub projects to spot skill gaps, missing experience, and inconsistencies.", icon: <><path d="M4 13.5l4-4 3 2.5 6-6" /><path d="M13 6h4v4" /></> },
+  { title: "README Assistant", text: "Give every project a polished first impression with focused documentation guidance.", icon: <><path d="M5 4.5A2.5 2.5 0 017.5 2H19v17H7.5A2.5 2.5 0 515 16.5v-12z" /><path d="M5 16.5A2.5 2.5 0 017.5 14H19" /></> },
   { title: "Career Roadmap", text: "Find the highest-impact projects and habits to build for the role you want next.", icon: <><circle cx="12" cy="12" r="8" /><path d="M12 8v4l3 2" /></> },
 ];
 

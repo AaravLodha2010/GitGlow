@@ -4,6 +4,11 @@ import PageAtmosphere from "@/components/PageAtmosphere";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+export const metadata = {
+  title: "Analyze portfolio — GitGlow",
+  description: "Analyze your GitHub portfolio with AI-powered insights and recommendations.",
+};
+
 export default async function AnalyzePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

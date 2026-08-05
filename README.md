@@ -8,66 +8,47 @@ Rather than simply reviewing code quality, GitGlow focuses on what recruiters ac
 
 ---
 
-## Problem
-
-Developers spend hundreds of hours building projects, but very few know whether their GitHub portfolio actually communicates their skills effectively.
-
-Recruiters often spend less than a minute reviewing a GitHub profile, yet there are few tools that explain:
-
-- What projects should I build next?
-- Why isn't my portfolio getting interviews?
-- Which repositories should I improve first?
-- How can I better match my dream company's expectations?
-
-GitGlow aims to answer those questions.
-
----
-
-## Planned Features
+## What's Inside
 
 ### Portfolio Analysis
+Analyze your public GitHub repositories and receive an overall portfolio score with repository-level breakdowns.
 
-Analyze repositories and generate an overall portfolio score.
+### AI-Powered Insights
+Get personalized recommendations for improving documentation, project structure, and presentation based on recruiter expectations.
 
-### AI Repository Reviews
-
-Receive personalized recommendations for improving documentation, project structure, repository health, and presentation.
-
-### README Assistant
-
-Generate professional README files based on repository content.
-
-### Resume Matching
-
-Compare a resume against GitHub projects and identify missing skills or inconsistencies.
+### Resume Alignment
+Upload your resume (PDF or text) and compare it against your GitHub projects to identify skill gaps, missing experience, and inconsistencies.
 
 ### Company Readiness
-
-Evaluate your portfolio against companies such as Mercari, Google, Microsoft, and other engineering employers.
+Evaluate how well your portfolio aligns with specific target companies like Google, Microsoft, Mercari, and others.
 
 ### Interview Preparation
-
-Generate interview questions based on your own projects and technical experience.
+Generate personalized interview questions based on your actual projects, skills, and technical experience.
 
 ---
 
 ## Tech Stack
 
 Frontend
-- Next.js
+- Next.js 16 (App Router)
 - React
 - TypeScript
 - Tailwind CSS
-- shadcn/ui
 
 Backend
-- Supabase
+- Supabase (PostgreSQL + Auth)
 
 Authentication
 - GitHub OAuth
 
 AI
-- OpenAI API
+- Groq API
+
+Charts
+- Recharts
+
+PDF Parsing
+- pdf-parse
 
 Deployment
 - Vercel
@@ -76,21 +57,32 @@ Deployment
 
 ## Roadmap
 
-### Phase 1
-- GitHub Authentication
-- Portfolio Dashboard
-- Repository Scanner
-- AI README Review
+### v0.1 — MVP Foundation (Completed)
+- GitHub OAuth authentication
+- Portfolio dashboard with saved reports
+- Repository analysis and portfolio scoring
+- AI recommendations with metrics breakdown
+- Responsive UI with dark theme
+- Recharts integration for score trends
 
-### Phase 2
-- Resume Analysis
-- Portfolio Scoring
-- AI Recommendations
+### v0.2 — Portfolio Coach (Completed)
+- Resume analysis with PDF/text upload
+- Resume vs GitHub comparison
+- Skill gap analysis
+- Project alignment feedback
+- Score trend visualization
 
-### Phase 3
-- Company Readiness
-- Interview Preparation
-- Public Portfolio Pages
+### v0.3 — Career Toolkit (In Progress)
+- Company readiness reports
+- Interview question generator
+- Dashboard consolidation across all report types
+
+### v1.0 — Public Launch (Planned)
+- Production-ready UI polish
+- Performance optimization
+- Complete documentation
+- Stable deployment
+- Public portfolio pages
 
 ---
 

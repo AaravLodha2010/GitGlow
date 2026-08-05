@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="relative mx-auto max-w-7xl px-6 pb-20 pt-20 text-center sm:pb-28 sm:pt-28 lg:px-8 lg:pt-32" id="how-it-works">
+    <section className="relative mx-auto max-w-7xl px-6 pb-20 pt-20 text-center sm:pb-28 sm:pt-28 lg:px-8 lg:pt-32" id="hero">
       <div className="pointer-events-none absolute left-1/2 top-[-9rem] -z-0 h-[28rem] w-[48rem] -translate-x-1/2 rounded-full bg-[#b9e843]/[0.09] blur-[120px]" />
       <div className="relative z-10 mx-auto max-w-4xl">
         <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/70 px-3 py-1.5 text-xs font-medium text-zinc-400 backdrop-blur">

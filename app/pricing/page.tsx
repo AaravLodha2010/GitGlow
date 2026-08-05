@@ -3,6 +3,11 @@ import Navbar from "@/components/Navbar";
 import PageAtmosphere from "@/components/PageAtmosphere";
 import PricingCards from "@/components/PricingCards";
 
+export const metadata = {
+  title: "Pricing — GitGlow",
+  description: "Simple, transparent pricing for GitGlow portfolio analysis.",
+};
+
 const faqs = [
   ["Is GitGlow free to use?", "Yes. During early access, the complete public GitHub analysis is available at no cost."],
   ["Do I need to connect my GitHub account?", "No. GitGlow analyzes public GitHub profiles by username, so there is no sign-in required."],
