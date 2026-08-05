@@ -15,12 +15,14 @@ export interface PortfolioReport {
   analysis: PortfolioAnalysis;
   createdAt: string;
   id: string;
+  isPublic: boolean;
   username: string;
 }
 
 export interface StoredReportRow {
   created_at: string;
   id: string;
+  is_public: boolean;
   metrics: unknown;
   recommendations: unknown;
   repositories: unknown;
@@ -93,6 +95,7 @@ function toReport(row: StoredReportRow): PortfolioReport {
     id: row.id,
     username: row.username,
     createdAt: row.created_at,
+    isPublic: row.is_public,
     analysis: {
       score: row.score,
       strengths: row.strengths,
@@ -119,7 +122,7 @@ export async function savePortfolioReport(
       metrics: analysis.metrics,
       repositories: analysis.repositories,
     })
-    .select("id, username, score, strengths, recommendations, metrics, repositories, created_at")
+    .select("id, username, score, strengths, recommendations, metrics, repositories, is_public, created_at")
     .single();
 
   if (error || !data) {
@@ -132,7 +135,7 @@ export async function savePortfolioReport(
 export async function getPortfolioReportsForUser(userId: string): Promise<PortfolioReport[]> {
   const { data, error } = await getSupabaseClient()
     .from("portfolio_reports")
-    .select("id, username, score, strengths, recommendations, metrics, repositories, created_at")
+    .select("id, username, score, strengths, recommendations, metrics, repositories, is_public, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -148,12 +151,50 @@ export async function getPortfolioReport(
 ): Promise<PortfolioReport | null> {
   const { data, error } = await getSupabaseClient()
     .from("portfolio_reports")
-    .select("id, username, score, strengths, recommendations, metrics, repositories, created_at")
+    .select("id, username, score, strengths, recommendations, metrics, repositories, is_public, created_at")
     .eq("id", reportId)
     .maybeSingle();
 
   if (error) {
     throw new Error("Unable to load this portfolio report.");
+  }
+
+  return data ? toReport(data as StoredReportRow) : null;
+}
+
+export async function togglePortfolioVisibility(
+  reportId: string,
+  userId: string,
+): Promise<boolean> {
+  const { data, error } = await getSupabaseClient()
+    .from("portfolio_reports")
+    .update({ is_public: () => `not is_public` })
+    .eq("id", reportId)
+    .eq("user_id", userId)
+    .select("is_public")
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error("Unable to update portfolio visibility.");
+  }
+
+  return data.is_public as boolean;
+}
+
+export async function getPublicPortfolioReport(
+  username: string,
+): Promise<PortfolioReport | null> {
+  const { data, error } = await getSupabaseClient()
+    .from("portfolio_reports")
+    .select("id, username, score, strengths, recommendations, metrics, repositories, created_at")
+    .eq("username", username)
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Unable to load this public portfolio.");
   }
 
   return data ? toReport(data as StoredReportRow) : null;

@@ -1,14 +1,15 @@
 import InterviewQuestionGenerator from "@/components/InterviewQuestionGenerator";
 import Navbar from "@/components/Navbar";
 import PageAtmosphere from "@/components/PageAtmosphere";
+import CursorGlow from "@/components/CursorGlow";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Interview preparation — GitGlow",
-  description: "Generate personalized interview questions based on your GitHub portfolio to prepare for software engineering interviews.",
+  title: "Interview prep — GitGlow",
+  description: "Get interview questions based on your GitHub projects, skills, and experience.",
 };
 
 export default async function InterviewPrepPage() {
@@ -22,6 +23,7 @@ export default async function InterviewPrepPage() {
   return (
     <main className="relative isolate flex min-h-screen flex-col overflow-hidden bg-[#09090b] text-zinc-50">
       <PageAtmosphere />
+      <CursorGlow />
       <Navbar />
       <section className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-20">
         <div className="pointer-events-none absolute size-[30rem] rounded-full bg-[#d7ff54]/[0.07] blur-[120px]" />
@@ -34,7 +36,7 @@ export default async function InterviewPrepPage() {
             <p className="text-sm font-medium text-[#d7ff54]">Interview preparation</p>
             <h1 className="mt-4 text-3xl font-semibold tracking-[-0.055em] text-zinc-100">Practice interview questions</h1>
             <p className="mt-3 text-sm leading-6 text-zinc-400">
-              We will generate personalized interview questions based on your GitHub projects, skills, and experience.
+              We will analyze your GitHub portfolio and generate personalized interview questions based on your projects, skills, and experience.
             </p>
             <div className="mt-8">
               <InterviewQuestionGenerator />

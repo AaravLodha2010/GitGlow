@@ -24,9 +24,17 @@ alter table public.portfolio_reports
 create index if not exists portfolio_reports_user_id_created_at_idx
   on public.portfolio_reports (user_id, created_at desc);
 
-drop policy if exists "Users can view their own reports" on public.portfolio_reports;
-create policy "Users can view their own reports"
+alter table public.portfolio_reports
+  add column if not exists is_public boolean not null default false;
+
+drop policy if exists "Anyone can view public portfolio reports" on public.portfolio_reports;
+create policy "Anyone can view public portfolio reports"
   on public.portfolio_reports for select
+  using (is_public = true);
+
+drop policy if exists "Users can update their own portfolio reports" on public.portfolio_reports;
+create policy "Users can update their own portfolio reports"
+  on public.portfolio_reports for update
   using (auth.uid() = user_id);
 
 create table if not exists public.resume_reports (

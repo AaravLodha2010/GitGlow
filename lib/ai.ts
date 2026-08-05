@@ -19,8 +19,9 @@ import {
   isInterviewAnalysis,
   type InterviewAnalysis,
 } from "@/lib/interview-analysis";
+import { callAI } from "@/lib/ai-client";
 
-const responseSchema = {
+const portfolioSchema = {
   type: "object",
   additionalProperties: false,
   required: ["score", "strengths", "recommendations", "metrics", "repositories"],
@@ -35,8 +36,8 @@ const responseSchema = {
     recommendations: {
       type: "array",
       items: { type: "string" },
-      minItems: 3,
-      maxItems: 3,
+      minItems: 5,
+      maxItems: 6,
     },
     metrics: {
       type: "object",
@@ -73,7 +74,8 @@ const responseSchema = {
           recommendations: {
             type: "array",
             items: { type: "string" },
-            maxItems: 3,
+            minItems: 3,
+            maxItems: 5,
           },
         },
       },
@@ -82,34 +84,11 @@ const responseSchema = {
   },
 } as const;
 
-interface GroqChatCompletion {
-  choices?: Array<{
-    message?: {
-      content?: string | null;
-    };
-  }>;
-}
-
-interface GroqErrorResponse {
-  error?: {
-    message?: string;
-  };
-}
-
-function getOutputText(response: GroqChatCompletion): string | null {
-  return response.choices?.[0]?.message?.content ?? null;
-}
-
 export async function gradeGitHubPortfolio(
   user: GitHubUser,
   repositories: GitHubRepository[],
   readmes: GitHubRepositoryReadme[],
 ): Promise<PortfolioAnalysis> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    throw new Error("GROQ_API_KEY is not configured.");
-  }
-
   const activeRepos = repositories.filter((repo) => !repo.archived && !repo.fork);
 
   const languageCounts = new Map<string, number>();
@@ -125,60 +104,24 @@ export async function gradeGitHubPortfolio(
 
   const readmeMap = new Map(readmes.map((r) => [r.repository, r.content]));
 
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.GROQ_MODEL ?? "openai/gpt-oss-20b",
-      messages: [
-        {
-          role: "system",
-          content: `You assess public GitHub portfolios for internship and junior developer applications. Base every conclusion only on the supplied profile, repository metadata, and README excerpts. Do not claim to have read source code, commit history, or private repositories. Give a balanced, concise evaluation. Return exactly the requested JSON.`,
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            profile: user,
-            repositories: activeRepos.slice(0, 8),
-            readmes: activeRepos.slice(0, 5).map((repo) => ({
-              name: repo.name,
-              content: readmeMap.get(repo.name) ?? null,
-            })),
-            hints: {
-              repositoryCount: repositories.length,
-              activeRepositories: activeRepos.length,
-              topLanguages,
-            },
-          }),
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "github_portfolio_assessment",
-          strict: true,
-          schema: responseSchema,
-        },
+  const result = await callAI(
+    "You assess public GitHub portfolios for internship and junior developer applications. Base every conclusion only on the supplied profile, repository metadata, and README excerpts. Do not claim to have read source code, commit history, or private repositories. Give a balanced, concise evaluation. Provide specific, actionable recommendations with concrete examples and step-by-step guidance. For each recommendation, explain why it matters and how to implement it. Return exactly the requested JSON.",
+    JSON.stringify({
+      profile: user,
+      repositories: activeRepos.slice(0, 8),
+      readmes: activeRepos.slice(0, 5).map((repo) => ({
+        name: repo.name,
+        content: readmeMap.get(repo.name) ?? null,
+      })),
+      hints: {
+        repositoryCount: repositories.length,
+        activeRepositories: activeRepos.length,
+        topLanguages,
       },
     }),
-    cache: "no-store",
-  });
+    portfolioSchema,
+  );
 
-  if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as GroqErrorResponse | null;
-    const detail = errorBody?.error?.message ?? "The request could not be completed.";
-    throw new Error(`Groq API error (${response.status}): ${detail}`);
-  }
-
-  const outputText = getOutputText((await response.json()) as GroqChatCompletion);
-  if (!outputText) {
-    throw new Error("AI portfolio grading returned no result.");
-  }
-
-  const result: unknown = JSON.parse(outputText);
   if (!isPortfolioAnalysis(result)) {
     throw new Error("AI portfolio grading returned an invalid result.");
   }
@@ -186,7 +129,7 @@ export async function gradeGitHubPortfolio(
   return result;
 }
 
-const resumeResponseSchema = {
+const resumeSchema = {
   type: "object",
   additionalProperties: false,
   required: ["score", "strengths", "recommendations", "skillGaps", "projectAlignment", "experienceGaps"],
@@ -201,19 +144,20 @@ const resumeResponseSchema = {
     recommendations: {
       type: "array",
       items: { type: "string" },
-      minItems: 3,
-      maxItems: 3,
+      minItems: 5,
+      maxItems: 6,
     },
     skillGaps: {
       type: "array",
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["skill", "status", "evidence"],
+        required: ["skill", "status", "evidence", "remediation"],
         properties: {
           skill: { type: "string" },
           status: { type: "string", enum: ["present", "missing", "partial"] },
           evidence: { type: "string" },
+          remediation: { type: "string" },
         },
       },
       maxItems: 8,
@@ -246,66 +190,25 @@ export async function compareResumeToGitHub(
   readmes: GitHubRepositoryReadme[],
   resumeText: string,
 ): Promise<ResumeAnalysis> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    throw new Error("GROQ_API_KEY is not configured.");
-  }
-
   const activeRepos = repositories.filter((repo) => !repo.archived && !repo.fork);
 
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.GROQ_MODEL ?? "openai/gpt-oss-20b",
-      messages: [
-        {
-          role: "system",
-          content: `You compare a candidate's resume against their public GitHub portfolio. Base every conclusion only on the supplied resume text, GitHub profile, repository metadata, and README excerpts. Do not claim to have read source code, commit history, or private repositories. Identify skill gaps, project alignment, and experience gaps. Be balanced, concise, and actionable. Return exactly the requested JSON.`,
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            resume: resumeText.slice(0, 8000),
-            profile: user,
-            repositories: activeRepos.slice(0, 8),
-            readmes: activeRepos.slice(0, 5).map((repo) => {
-              const readme = readmes.find((r) => r.repository === repo.name);
-              return {
-                name: repo.name,
-                content: readme?.content ?? null,
-              };
-            }),
-          }),
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "resume_github_comparison",
-          strict: true,
-          schema: resumeResponseSchema,
-        },
-      },
+  const result = await callAI(
+    "You compare a candidate's resume against their public GitHub portfolio. Base every conclusion only on the supplied resume text, GitHub profile, repository metadata, and README excerpts. Do not claim to have read source code, commit history, or private repositories. Identify skill gaps, project alignment, and experience gaps. For each skill gap, provide a concrete remediation step with specific resources or project ideas. Recommendations should be detailed, actionable, and include implementation guidance. Be balanced, concise, and actionable. Return exactly the requested JSON.",
+    JSON.stringify({
+      resume: resumeText.slice(0, 8000),
+      profile: user,
+      repositories: activeRepos.slice(0, 8),
+      readmes: activeRepos.slice(0, 5).map((repo) => {
+        const readme = readmes.find((r) => r.repository === repo.name);
+        return {
+          name: repo.name,
+          content: readme?.content ?? null,
+        };
+      }),
     }),
-    cache: "no-store",
-  });
+    resumeSchema,
+  );
 
-  if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as GroqErrorResponse | null;
-    const detail = errorBody?.error?.message ?? "The request could not be completed.";
-    throw new Error(`Groq API error (${response.status}): ${detail}`);
-  }
-
-  const outputText = getOutputText((await response.json()) as GroqChatCompletion);
-  if (!outputText) {
-    throw new Error("AI resume comparison returned no result.");
-  }
-
-  const result: unknown = JSON.parse(outputText);
   if (!isResumeAnalysis(result)) {
     throw new Error("AI resume comparison returned an invalid result.");
   }
@@ -313,7 +216,7 @@ export async function compareResumeToGitHub(
   return result;
 }
 
-const companyResponseSchema = {
+const companySchema = {
   type: "object",
   additionalProperties: false,
   required: ["score", "strengths", "recommendations", "relevantSkills", "missingSkills", "projectFit"],
@@ -328,8 +231,8 @@ const companyResponseSchema = {
     recommendations: {
       type: "array",
       items: { type: "string" },
-      minItems: 3,
-      maxItems: 3,
+      minItems: 5,
+      maxItems: 6,
     },
     relevantSkills: {
       type: "array",
@@ -373,64 +276,23 @@ export async function evaluateCompanyReadiness(
   readmes: GitHubRepositoryReadme[],
   company: string,
 ): Promise<CompanyAnalysis> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    throw new Error("GROQ_API_KEY is not configured.");
-  }
-
   const activeRepos = repositories.filter((repo) => !repo.archived && !repo.fork);
   const readmeMap = new Map(readmes.map((r) => [r.repository, r.content]));
 
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.GROQ_MODEL ?? "openai/gpt-oss-20b",
-      messages: [
-        {
-          role: "system",
-          content: `You evaluate a candidate's GitHub portfolio for readiness to apply to a specific company. Base every conclusion only on the supplied profile, repository metadata, and README excerpts. Do not claim to have read source code, commit history, or private repositories. Consider the company's known technology stack, open-source contributions, and engineering culture when relevant. Be balanced, concise, and actionable. Return exactly the requested JSON.`,
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            company,
-            profile: user,
-            repositories: activeRepos.slice(0, 8),
-            readmes: activeRepos.slice(0, 5).map((repo) => ({
-              name: repo.name,
-              content: readmeMap.get(repo.name) ?? null,
-            })),
-          }),
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "company_readiness_assessment",
-          strict: true,
-          schema: companyResponseSchema,
-        },
-      },
+  const result = await callAI(
+    "You evaluate a candidate's GitHub portfolio for readiness to apply to a specific company. Base every conclusion only on the supplied profile, repository metadata, and README excerpts. Do not claim to have read source code, commit history, or private repositories. Consider the company's known technology stack, open-source contributions, and engineering culture when relevant. Provide specific, actionable recommendations with concrete steps the candidate can take to improve their alignment with this company. Include project ideas, learning paths, and portfolio improvements tailored to the company's tech stack and values. Return exactly the requested JSON.",
+    JSON.stringify({
+      company,
+      profile: user,
+      repositories: activeRepos.slice(0, 8),
+      readmes: activeRepos.slice(0, 5).map((repo) => ({
+        name: repo.name,
+        content: readmeMap.get(repo.name) ?? null,
+      })),
     }),
-    cache: "no-store",
-  });
+    companySchema,
+  );
 
-  if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as GroqErrorResponse | null;
-    const detail = errorBody?.error?.message ?? "The request could not be completed.";
-    throw new Error(`Groq API error (${response.status}): ${detail}`);
-  }
-
-  const outputText = getOutputText((await response.json()) as GroqChatCompletion);
-  if (!outputText) {
-    throw new Error("AI company readiness evaluation returned no result.");
-  }
-
-  const result: unknown = JSON.parse(outputText);
   if (!isCompanyAnalysis(result)) {
     throw new Error("AI company readiness evaluation returned an invalid result.");
   }
@@ -438,7 +300,7 @@ export async function evaluateCompanyReadiness(
   return result;
 }
 
-const interviewResponseSchema = {
+const interviewSchema = {
   type: "object",
   additionalProperties: false,
   required: ["score", "strengths", "recommendations", "questions", "focusAreas"],
@@ -453,20 +315,21 @@ const interviewResponseSchema = {
     recommendations: {
       type: "array",
       items: { type: "string" },
-      minItems: 3,
-      maxItems: 3,
+      minItems: 5,
+      maxItems: 6,
     },
     questions: {
       type: "array",
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["question", "type", "difficulty", "hint"],
+        required: ["question", "type", "difficulty", "hint", "preparation"],
         properties: {
           question: { type: "string" },
           type: { type: "string", enum: ["technical", "behavioral", "system_design", "project"] },
           difficulty: { type: "string", enum: ["easy", "medium", "hard"] },
           hint: { type: "string" },
+          preparation: { type: "string" },
         },
       },
       maxItems: 10,
@@ -484,63 +347,22 @@ export async function generateInterviewQuestions(
   repositories: GitHubRepository[],
   readmes: GitHubRepositoryReadme[],
 ): Promise<InterviewAnalysis> {
-  const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) {
-    throw new Error("GROQ_API_KEY is not configured.");
-  }
-
   const activeRepos = repositories.filter((repo) => !repo.archived && !repo.fork);
   const readmeMap = new Map(readmes.map((r) => [r.repository, r.content]));
 
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: process.env.GROQ_MODEL ?? "openai/gpt-oss-20b",
-      messages: [
-        {
-          role: "system",
-          content: `You generate interview preparation material for software engineering candidates based on their GitHub portfolio. Base every conclusion only on the supplied profile, repository metadata, and README excerpts. Do not claim to have read source code, commit history, or private repositories. Generate realistic interview questions that a candidate might face, grouped by type and difficulty. Provide actionable preparation advice. Return exactly the requested JSON.`,
-        },
-        {
-          role: "user",
-          content: JSON.stringify({
-            profile: user,
-            repositories: activeRepos.slice(0, 8),
-            readmes: activeRepos.slice(0, 5).map((repo) => ({
-              name: repo.name,
-              content: readmeMap.get(repo.name) ?? null,
-            })),
-          }),
-        },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "interview_preparation",
-          strict: true,
-          schema: interviewResponseSchema,
-        },
-      },
+  const result = await callAI(
+    "You generate interview preparation material for software engineering candidates based on their GitHub portfolio. Base every conclusion only on the supplied profile, repository metadata, and README excerpts. Do not claim to have read source code, commit history, or private repositories. Generate realistic interview questions that a candidate might face, grouped by type and difficulty. For each question, provide a detailed preparation guide with specific talking points, technical concepts to review, and example answers drawn from the candidate's actual projects. Provide actionable preparation advice. Return exactly the requested JSON.",
+    JSON.stringify({
+      profile: user,
+      repositories: activeRepos.slice(0, 8),
+      readmes: activeRepos.slice(0, 5).map((repo) => ({
+        name: repo.name,
+        content: readmeMap.get(repo.name) ?? null,
+      })),
     }),
-    cache: "no-store",
-  });
+    interviewSchema,
+  );
 
-  if (!response.ok) {
-    const errorBody = (await response.json().catch(() => null)) as GroqErrorResponse | null;
-    const detail = errorBody?.error?.message ?? "The request could not be completed.";
-    throw new Error(`Groq API error (${response.status}): ${detail}`);
-  }
-
-  const outputText = getOutputText((await response.json()) as GroqChatCompletion);
-  if (!outputText) {
-    throw new Error("AI interview preparation returned no result.");
-  }
-
-  const result: unknown = JSON.parse(outputText);
   if (!isInterviewAnalysis(result)) {
     throw new Error("AI interview preparation returned an invalid result.");
   }

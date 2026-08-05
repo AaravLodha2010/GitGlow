@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PDFParse } from "pdf-parse";
 
 const loadingMessages = [
   "Reading your resume...",
@@ -21,14 +20,6 @@ function extractTextFromFile(file: File): Promise<string> {
     reader.onerror = () => reject(new Error("Failed to read file."));
     reader.readAsText(file);
   });
-}
-
-async function extractPdfText(file: File): Promise<string> {
-  const arrayBuffer = await file.arrayBuffer();
-  const parser = new PDFParse({ data: arrayBuffer });
-  const result = await parser.getText();
-  await parser.destroy();
-  return result.text.trim();
 }
 
 export default function ResumeUploadForm() {
@@ -62,7 +53,21 @@ export default function ResumeUploadForm() {
     try {
       let text = "";
       if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
-        text = await extractPdfText(file);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/api/resume/parse-pdf", {
+          method: "POST",
+          body: formData,
+        });
+
+        const payload = (await response.json()) as { error?: string; text?: string };
+
+        if (!response.ok || !payload.text) {
+          throw new Error(payload.error ?? "Failed to parse PDF.");
+        }
+
+        text = payload.text;
       } else {
         text = await extractTextFromFile(file);
       }
@@ -132,7 +137,7 @@ export default function ResumeUploadForm() {
           <svg viewBox="0 0 24 24" className="size-4 text-[#d7ff54]" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M7 3v12a4 4 0 0 0 8 0V7M7 7h8" strokeLinecap="round" /></svg>
         </div>
         <p className="mt-6 text-lg font-medium tracking-[-0.02em] text-zinc-100">{loadingMessages[messageIndex]}</p>
-        <p className="mt-2 text-sm text-zinc-500">Building your personalized resume-to-portfolio report.</p>
+        <p className="mt-2 text-sm text-zinc-500">This usually takes a few seconds.</p>
       </div>
     );
   }

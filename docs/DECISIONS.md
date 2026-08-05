@@ -96,27 +96,40 @@ Accepted
 
 ## Decision
 
-Use **Groq API** for AI-powered analysis and structured JSON outputs.
+Use a **provider-agnostic AI client** with Gemini as primary and Groq as fallback.
 
 ### Why
 
 - Fast inference speeds suitable for real-time portfolio analysis
 - Supports JSON schema structured outputs for reliable data parsing
-- Generous free tier appropriate for early-stage development
-- Cost-effective compared to other LLM providers
-- OpenAI-compatible API interface
+- Generous free tiers from both providers
+- Automatic fallback ensures reliability when one provider is out of credits or rate-limited
+- Easy to switch providers via environment variable without code changes
 
 ### Alternatives Considered
 
-- OpenAI API
-- Anthropic Claude
-- Google Gemini
+- OpenAI API only
+- Anthropic Claude only
+- Google Gemini only
+- Groq API only
 - Local LLMs
 - Rule-based scoring
 
 ### Status
 
 Accepted
+
+## Configuration
+
+Set `AI_PROVIDER` in `.env.local`:
+- `gemini` - Use Gemini API (default)
+- `groq` - Use Groq API
+
+Requires corresponding API keys:
+- `GEMINI_API_KEY` for Gemini
+- `GROQ_API_KEY` for Groq
+
+If primary provider fails, the client automatically falls back to the other provider.
 
 ---
 

@@ -3,12 +3,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "GitGlow — Your GitHub, at its best",
-  description: "AI-powered software engineering coach that helps developers build recruiter-ready GitHub portfolios.",
-  keywords: ["GitHub", "portfolio", "developer", "internship", "AI", "career", "resume"],
+  description: "Review your GitHub portfolio with clear feedback and actionable improvements.",
+  keywords: ["GitHub", "portfolio", "developer", "internship", "career", "resume"],
   authors: [{ name: "Aarav Lodha" }],
   openGraph: {
     title: "GitGlow — Your GitHub, at its best",
-    description: "Turn your GitHub into your strongest resume with AI-powered portfolio analysis.",
+    description: "Get a clear review of your public GitHub profile with specific, actionable feedback.",
     type: "website",
   },
 };

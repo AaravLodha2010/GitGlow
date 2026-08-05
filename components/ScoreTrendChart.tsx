@@ -27,24 +27,42 @@ export default function ScoreTrendChart({ reports }: ScoreTrendChartProps) {
   }));
 
   return (
-    <div className="mt-6 h-48 w-full">
+    <div className="mt-6 h-52 w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data}>
+        <AreaChart data={data} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
           <defs>
             <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#d7ff54" stopOpacity={0.25} />
+              <stop offset="5%" stopColor="#d7ff54" stopOpacity={0.3} />
               <stop offset="95%" stopColor="#d7ff54" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey="date" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
-          <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} domain={[0, 100]} />
+          <XAxis
+            dataKey="date"
+            stroke="#71717a"
+            fontSize={11}
+            tickLine={false}
+            axisLine={false}
+            dy={8}
+          />
+          <YAxis
+            stroke="#71717a"
+            fontSize={11}
+            tickLine={false}
+            axisLine={false}
+            domain={[0, 100]}
+            tickFormatter={(value) => `${value}`}
+          />
           <Tooltip
             contentStyle={{
               backgroundColor: "#18181b",
               border: "1px solid #27272a",
               borderRadius: "0.75rem",
               color: "#e4e4e7",
+              fontSize: "12px",
+              padding: "8px 12px",
             }}
+            labelStyle={{ color: "#a1a1aa", marginBottom: "4px" }}
+            formatter={(value) => <span className="text-[#d7ff54]">{`${value}/100`}</span>}
           />
           <Area
             type="monotone"
@@ -52,6 +70,8 @@ export default function ScoreTrendChart({ reports }: ScoreTrendChartProps) {
             stroke="#d7ff54"
             strokeWidth={2}
             fill="url(#scoreGradient)"
+            animationDuration={1000}
+            animationEasing="ease-out"
           />
         </AreaChart>
       </ResponsiveContainer>

@@ -69,7 +69,7 @@ export default function InterviewQuestionGenerator() {
           <svg viewBox="0 0 24 24" className="size-4 text-[#d7ff54]" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M7 3v12a4 4 0 0 0 8 0V7M7 7h8" strokeLinecap="round" /></svg>
         </div>
         <p className="mt-6 text-lg font-medium tracking-[-0.02em] text-zinc-100">{loadingMessages[messageIndex]}</p>
-        <p className="mt-2 text-sm text-zinc-500">Building your personalized interview preparation report.</p>
+        <p className="mt-2 text-sm text-zinc-500">This usually takes a few seconds.</p>
       </div>
     );
   }

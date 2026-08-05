@@ -6,6 +6,7 @@ export interface ResumeAnalysis {
     skill: string;
     status: "present" | "missing" | "partial";
     evidence: string;
+    remediation: string;
   }>;
   projectAlignment: Array<{
     project: string;
@@ -61,7 +62,8 @@ export function isResumeAnalysis(value: unknown): value is ResumeAnalysis {
         typeof g.skill === "string" &&
         typeof g.status === "string" &&
         ["present", "missing", "partial"].includes(g.status as string) &&
-        typeof g.evidence === "string"
+        typeof g.evidence === "string" &&
+        typeof g.remediation === "string"
       );
     }) &&
     projectAlignment.every((item: unknown) => {
@@ -87,7 +89,8 @@ export function validateSkillGaps(value: unknown): ResumeAnalysis["skillGaps"] {
       typeof g.skill === "string" &&
       typeof g.status === "string" &&
       ["present", "missing", "partial"].includes(g.status as string) &&
-      typeof g.evidence === "string"
+      typeof g.evidence === "string" &&
+      typeof g.remediation === "string"
     );
   });
 }

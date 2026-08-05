@@ -35,7 +35,7 @@ export default function PortfolioPreview() {
             </div>
             <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/70 p-4">
               <p className="text-[11px] font-medium uppercase tracking-[0.13em] text-zinc-500">Recruiter Impression</p>
-              <p className="mt-2 text-sm leading-6 text-zinc-300">“Strong real-world projects and documentation. Improve commit consistency and add one collaborative project.”</p>
+              <p className="mt-2 text-sm leading-6 text-zinc-300">&ldquo;Strong real-world projects and documentation. Improve commit consistency and add one collaborative project.&rdquo;</p>
             </div>
           </article>
         </div>

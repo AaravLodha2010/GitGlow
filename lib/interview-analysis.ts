@@ -7,6 +7,7 @@ export interface InterviewAnalysis {
     type: "technical" | "behavioral" | "system_design" | "project";
     difficulty: "easy" | "medium" | "hard";
     hint: string;
+    preparation: string;
   }>;
   focusAreas: string[];
 }
@@ -74,7 +75,9 @@ export function validateQuestions(value: unknown): InterviewAnalysis["questions"
       ["technical", "behavioral", "system_design", "project"].includes(question.type as string) &&
       typeof question.difficulty === "string" &&
       ["easy", "medium", "hard"].includes(question.difficulty as string) &&
-      typeof question.hint === "string"
+      typeof question.hint === "string" &&
+      typeof question.preparation === "string" &&
+      typeof question.preparation === "string"
     );
   });
 }

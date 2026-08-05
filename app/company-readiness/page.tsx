@@ -1,6 +1,7 @@
 import CompanySelector from "@/components/CompanySelector";
 import Navbar from "@/components/Navbar";
 import PageAtmosphere from "@/components/PageAtmosphere";
+import CursorGlow from "@/components/CursorGlow";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Company readiness — GitGlow",
-  description: "Evaluate your GitHub portfolio readiness for specific companies like Google, Microsoft, and more.",
+  description: "See how your GitHub portfolio measures up against specific companies.",
 };
 
 export default async function CompanyReadinessPage() {
@@ -22,6 +23,7 @@ export default async function CompanyReadinessPage() {
   return (
     <main className="relative isolate flex min-h-screen flex-col overflow-hidden bg-[#09090b] text-zinc-50">
       <PageAtmosphere />
+      <CursorGlow />
       <Navbar />
       <section className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-20">
         <div className="pointer-events-none absolute size-[30rem] rounded-full bg-[#d7ff54]/[0.07] blur-[120px]" />
